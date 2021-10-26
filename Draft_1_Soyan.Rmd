@@ -10,8 +10,7 @@ output:
 ```{r setup}
 ##Set knitr options (show both code and output, show output w/o leading #, make figures smaller, hold figures until after chunk)
 knitr::opts_chunk$set(echo=TRUE, include=TRUE, comment=NA, fig.height=3, fig.width=4.2, fig.show="hold")
-require("knitr")
-opts_knit$set(root.dir = "~/path/to/folder/") #I got this online https://stackoverflow.com/questions/46008301/cant-set-working-directory-in-r-notebook-chunk-strange-error
+
 ```
 
 ## First steps
@@ -32,12 +31,7 @@ library(htmlwidgets)
 I am using guidelines for readtext from this (source)[https://github.com/quanteda/readtext]
 
 ```{r}
-getwd() #I tried to set the directory so that I can easily access the file I want but I failed.
-setwd("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/data") # Somehow this does not work although it used to work yesterday.
-# I am supposed to create DATA_DIR for the readtext
-DATA_DIR <- system.file("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/data", package = "readtext")
-#This code is supposed to load one text
-text1 <- readtext(paste0(DATA_DIR, "~/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/data/text1.txt"), encoding = "UTF-8")
+text1 <- readtext("data/text1.txt", encoding = "UTF-8")
 # I was able to load one text
 text1$text
 # I want to exclude the words "unclear" from the text
