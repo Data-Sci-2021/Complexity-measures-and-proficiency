@@ -10,6 +10,7 @@ output:
 ```{r setup}
 ##Set knitr options (show both code and output, show output w/o leading #, make figures smaller, hold figures until after chunk)
 knitr::opts_chunk$set(echo=TRUE, include=TRUE, comment=NA, fig.height=3, fig.width=4.2, fig.show="hold")
+Sys.setlocale("LC_CTYPE", "Russian") #to make sure my text is not gibberish, readable
 
 ```
 
@@ -23,10 +24,27 @@ library(readtext)
 library(quanteda)
 #install.packages("htmlwidgets") to work with strings and regular expressions
 library(htmlwidgets)
+# install.packages('tidytext') to be able to perform tokenization
+library(tidytext)
+#install.packages('tokenizers')
+library(tokenizers)
 ```
 
 
 ## An attempt to read at least one .txt file
+
+```{r}
+(text1 <- readLines("data/text1.txt", encoding = "UTF-8"))
+(tok_text1 <- tokenize_words(text1))
+mod_text1 <- tibble(line = 1:145, word = tok_text1)
+mod_text1
+tok_text1 %>% filter("unclear")
+(text1_df <- tibble(line = 1, text = text1)) #The text somehow becomes gibberish
+tidy_text1 <- text1_df %>% 
+  unnest_tokens(word, text, to_lower = FALSE) #word - tokenization unit, text - the name of the column with the text in text1
+tidy_text1
+```
+
 
 I am using guidelines for readtext from this (source)[https://github.com/quanteda/readtext]
 
@@ -48,6 +66,24 @@ text1mod2 <- removeWords(text1$text, stopwords)
 text1mod2 #success! I was able to remove the words "unclear" from the text in Russian.
 
 ```
+## Tokenization
+
+```{r}
+# This is my attempt to tokenize the one text I loaded. Text1 is already a dataframe 
+text1_tidy <- text1 %>% 
+  unnest_tokens(word, text, to_lower = FALSE) #word - tokenization unit, text - the name of the column with the text in text1
+#Now I have a tidy text but I have a column text in my df which I cannot delete
+text1_tidy <- text1_tidy %>% 
+  select(word)
+text1_tidy #the spare column text is still haunting me
+stopwords <-"unclear" # I will come up with other words later on
+tidy_text1 <- anti_join(text1_tidy, by = "stopwords") #Why can't I remove the word "unclear"
+text1_tidy #readtext seems to not work well with tidytext
+
+```
+
+
+
 
 ## Complexity measures
 
@@ -73,5 +109,11 @@ ntoken(text1mod2, remove_punct = TRUE) # Now it works!
 I am not sure how to count the number of T-units. I think I need to write my own function. If the definition of a sentence is anything which starts with an upper-case letter and ends with a period or ! or ?, then, the definition of a T-unit is a little bit more complex. Based on mt example test, T-unit may start with an upper- or lower-case and it can end before и if there is a subject and a verb after it or end with a period, ?, !.
 ```{r}
 #nTunit <- function(str, )
+```
+
+## At the end of the document
+
+```{r}
+Sys.setlocale("LC_CTYPE", "English") # to make sure that nothing changes how my other files are read
 ```
 

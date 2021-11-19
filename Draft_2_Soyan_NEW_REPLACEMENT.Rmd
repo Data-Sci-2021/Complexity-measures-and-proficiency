@@ -1,0 +1,226 @@
+---
+title: "Draft_2_clean_Soyan"
+author: "Rossina Soyan"
+date: "11/19/2021"
+output: 
+  github_document: 
+    toc: TRUE
+---
+
+```{r setup}
+##Set knitr options (show both code and output, show output w/o leading #, make figures smaller, hold figures until after chunk)
+knitr::opts_chunk$set(echo=TRUE, include=TRUE, comment=NA, fig.height=3, fig.width=4.2, fig.show="hold")
+Sys.setlocale("LC_CTYPE", "Russian") #to make sure my text is not gibberish, readable
+```
+
+## What I need to install to run the codes?
+
+```{r}
+library(tidyverse)
+#install.packages('quanteda') to work with a corpus
+library(quanteda)
+#install.packages("htmlwidgets") to work with strings and regular expressions
+library(htmlwidgets)
+# install.packages('tidytext') to be able to perform tokenization
+library(tidytext)
+#install.packages('corpus')
+library(corpus) #To split the text into sentences
+#install.packages('spacyr')
+library(spacyr) #to be able to count the T-units
+```
+
+## Loading and tokenizing one text in L2 Russian
+
+```{r}
+text1 <- readLines("data/text1.txt", encoding = "UTF-8")
+text1 #Success!
+# I want to exclude the words "unclear" from the text
+# Let's try writing a function as in this link (https://stackoverflow.com/questions/35790652/removing-words-featured-in-character-vector-from-string)
+stopwords = "unclear"
+removeWords <- function(str, stopwords) {
+  x <- unlist(strsplit(str, " "))
+  paste(x[!x %in% stopwords], collapse = " ")
+}
+text1clean <- removeWords(text1, stopwords)
+text1clean #success! I was able to remove the words "unclear" from the text in Russian.
+
+#Not to the future me: I need to make sure I remove everything between <> in my texts. I don't have comments in text1 but there are comments in other texts. Maybe use str_remove_all("<.+>")?
+
+text1_df <- tibble(text = text1clean) #I use this dataframe for my rsyntax dependency analysis and other syntactic complexity measures. 
+text1_df #Success
+
+#Let me create a tidytext
+tidy_text1 <- text1_df %>% 
+  unnest_tokens(word, text) #I decided to make all words lower-case here, but then I deleted to_lower = FALSE 
+tidy_text1 #Success But I need каким-то to be one word. Overall, all punctuation is removed and all words have become lower-case. I can use this tibble for my lexical complexity analysis
+
+#The count function can help me identify stopwords for my analysis
+tidy_text1 %>% 
+  count(word, sort = TRUE) 
+
+```
+Let me now try to measure complexity measures in one text. I have chosen the list of lexical and syntactic complexity measures based on the book by Barkaoui and Hadidi (2020). They understand lexical complexity as "the richness of a writer's lexicon" (p. 13) and divide it into four components: *lexical density*, *lexical variation*, *lexical sophistication*, and *lexical bundles*. As for syntactic complexity, it is understood as "grammatical variation and sophistication" (Wolfe-Quintero et al., 1998, p. 45). It is also a multi-dimensional construct and includes *global complexity*, *complexity by coordination*, *complexity by subordination*, *clausal complexity*, and *structural variety*.
+
+Let me try to figure out if I can measure these constructs in one text in L2 Russian.
+
+## Lexical complexity measures
+
+### Lexical density 
+
+Lexical density is understood as the ratio of lexical words. I need to divide the number of lexical words (nouns, verbs, adjectives, adverbs) per the total number of words. 
+
+```{r}
+#First, I needed to figure out how to exclude non-lexical words. I looked into the list of stopwords in the corpus package.
+?stopwords_ru
+stopwords_ru #But this list does not make sense. There are no combinations in the Russian language which are included in this list. I had to create my own list of stopwords.
+```
+
+I made my own list of non-lexical words which included a list of prepositions, conjunctions, interjections and particles. 
+
+```{r}
+RusConjCoord2 <- readLines("additional_documents/Russian_conjunctions_COORD.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>") 
+RusPrep2 <- readLines("additional_documents/Russian_prepositions.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>") 
+RusConjSubord2 <- readLines("additional_documents/Russian_conjunctions_SUBORD.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>")
+RusInter2 <- readLines("additional_documents/Russian_interjections.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>")
+RusPrtcl2 <- readLines("additional_documents/Russian_particles.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>") 
+AllnonLEX <- c(RusConjCoord2, RusPrep2, RusConjSubord2, RusInter2, RusPrtcl2) 
+AllnonLEX_df <- tibble(word = AllnonLEX) #This column name should be the same for using the anti-join()
+AllnonLEX_df #Success! 
+```
+Somehow the anti-join command did not work out so I used the code I found online
+
+```{r}
+#main_data2 <- main_data[ ! main_data$NAMES %in% NAMES_list, ] From https://stackoverflow.com/questions/13012509/how-to-delete-rows-from-a-data-frame-based-on-an-external-list-using-r/13012618
+Lex_text1 <- tidy_text1[ ! tidy_text1$word %in% AllnonLEX, ]
+Lex_text1 #Success there is a problem with каким-то. It is counted as two words. I need to work on making it one word. I tried to work with the text using corpus::text_tokens() but the result for now looks ugly.
+```
+Now I need to come up with a function for measuring lexical density
+
+```{r}
+LexDens_text1 <- nrow(Lex_text1)/nrow(tidy_text1)
+LexDens_text1 #Success - I need to write a function
+```
+
+### Lexial variation
+
+Lexial variation is measured with type-token ratio but since TTR is affected by text length, researchers started using MTLD instead.
+
+```{r}
+#I googled MTLD function in the koRpus package. Let's try it out.
+#install.packages("koRpus")
+#install.koRpus.lang(c("en","ru"))
+#available.koRpus.lang()
+library(koRpus) #I hope this package helps me calculate MTLD
+library(koRpus.lang.ru)
+library(koRpus.lang.en)
+?MTLD #I am expected to tokenize the text within the tokenize function of this package
+koR_text1 <- tokenize("data/text1.txt", fileEncoding = "UTF-8", lang = "ru") #Success. I had to indicate the path to the .txt file, not try to input the existing tibble. 
+koR_text1 #BUT I don't know yet how to filter out the words 'unclear'
+MTLD(koR_text1) #Success! Now I need to figure out how to write a function for a corpus of texts
+```
+
+### Lexical sophistication
+
+Lexical sophistication is measured using the average word length. I need to calculate the length of each word, add everything up and divide by the number of words in each text. 
+
+```{r}
+AWL_text1 <- sum(str_length(tidy_text1$word)) / nrow(tidy_text1)
+AWL_text1 #Success! Nowm I need to write function for the corpus of texts
+```
+### Lexical bundles
+
+The use of lexical bundles is measures through comparing multi-word expressions in L2 texts with the list of popular multi-word expressions from a representative corpus. There is a list of lexical bundles from the Russian academic corpus, but my texts are non-academic texts. I will leave this measure unmeasured for the time being. I will come back to it if I have time and try to figure out how to measure it.
+
+## Syntactic complexity
+
+### Global syntactic complexity 
+
+It is measured using the mean sentence length. I need to count the number of sentences and also the number of words in a text and then divide words per sentences.
+
+```{r}
+#How do I calculate the number of sentences in text1?
+nsentence(text1) #The answer is more or less correct. I was not able to figure our how to remove the address term in the very beginning of the text (= the sentence without a verb = not a sentence). Let me try to split the text into sentences using the corpus package
+text_split(text1) #Great it works!
+nrow(tidy_text1)
+#let me calculate the mean sentence length
+(MLStext1<- nrow(tidy_text1) / nsentence(text1)) #Success! Now I need to write the function for a corpus
+```
+
+
+### Complexity by coordination
+
+I need to calculate T-units or clauses per sentence. The good news is I can calculate the number of sentences. Now I need to figure out how to calculate the number of T-units or clauses. Then, I need to divide the number of T-units per sentences.
+
+```{r}
+#FYI, the spacyr does not parse Russian texts well. My experience is described below
+#I manually installed miniconda
+# spacy_install()
+#spacy_initialize(model = "en_core_web_sm") #This is for the English lge. 
+# spacy_download_langmodel("ru_core_news_sm") # Success!
+
+parsed_text1 <- spacy_parse(text1, lemma = FALSE, entity = TRUE, nounphrase = TRUE) 
+entity_extract(parsed_text1) # This can be used to anonymize the texts BUT it contains a lot of mistakes
+spacy_parse(text1, dependency = TRUE, pos = FALSE) #Looks amazing BUT contains a lot of mistakes
+entity_consolidate(parsed_text1) # Only some entities are consolidated
+nounphrase_extract(parsed_text1) # Mostly incorrect
+nounphrase_consolidate(parsed_text1) #Too many mistakes for the Russian lge
+#Integration with quanted
+ntoken(parsed_text1) #That is more than number of words. I guess it includes all the punctuation
+ntype(parsed_text1)
+#How to select only nouns
+spacy_parse(text1, pos = TRUE) %>%
+    as.tokens(include_pos = "pos") %>%
+    tokens_select(pattern = c("*/NOUN")) #It shows everything as a noun. It is crazy
+```
+
+Let me try the udpipe package. 
+
+```{r}
+#install.packages("udpipe")
+library(udpipe)
+#dl <- udpipe_download_model(language = "russian")
+#The website says that I need to load the model https://cran.r-project.org/web/packages/udpipe/vignettes/udpipe-annotation.html
+udmodel_rus <- udpipe_load_model(file = "additional_documents/russian-gsd-ud-2.5-191206.udpipe")
+
+y <- udpipe_annotate(udmodel_rus, x = text1_df$text)
+y <- as.data.frame(y)
+y #I think I like this ouput. Let's continue
+
+#install.packages('rsyntax') #From https://www.rdocumentation.org/packages/rsyntax/versions/0.1.2
+library(rsyntax)
+tokens = as_tokenindex(y)
+plot_tree(tokens, token, lemma, upos) #I have a plot of the first sentence and root and an adjective modifier!
+tquery(upos = c("VERB", "PROPN"))
+tq = tquery(upos = 'VERB', 
+            children(relation = 'nsubj'))
+direct = tquery(label = 'verb', upos = 'VERB', 
+                children(label = 'subject', relation = 'nsubj'),
+                children(label = 'object', relation = 'obj'))
+tokens = annotate_tqueries(tokens, 'clause', direct)
+
+tokens[,c('doc_id','sentence','token','clause','clause_fill')] #This seems to work out but I do not know how to move from here to the number of clauses in a text
+```
+
+Can I find all simple clauses? Is it even necessary? But let me try
+
+```{r}
+#simple = tquery(label = )
+```
+
+# Final notes
+```{r}
+Sys.setlocale("LC_CTYPE", "English") # to make sure that nothing changes how my other files are read
+```
+
+## Session info
+
+
+```{r}
+sessionInfo()
+```
+

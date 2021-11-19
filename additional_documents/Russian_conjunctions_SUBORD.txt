@@ -1,0 +1,38 @@
+<I am not sure what to do with conjunctions which consists of two parts. For now, I just put them in one list and put commas between the two parts, but technically they are conjunctions only when the other part is also present. The list of conjucntions is taken from https://ru.wikipedia.org/wiki/%D0%A1%D0%BE%D1%8E%D0%B7_(%D1%87%D0%B0%D1%81%D1%82%D1%8C_%D1%80%D0%B5%D1%87%D0%B8)>
+что
+чтобы
+как
+когда
+лишь
+едва
+где
+куда
+откуда
+столько
+настолько
+так
+до такой степени
+до того
+такой
+как будто
+словно
+будто
+точно
+как бы
+так как
+потому что
+если
+если бы
+коли
+ежели
+несмотря на то
+хотя
+хоть
+пускай
+чтобы
+дабы
+с тем чтобы
+так что
+потому
+потому что
+поскольку
