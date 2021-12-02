@@ -1,0 +1,169 @@
+---
+title: "Draft_3_Soyan_loading_texts"
+author: "Rossina Soyan"
+date: "11/24/2021"
+output:
+  github_document: 
+    toc: TRUE
+---
+# How to load a corpus of texts?
+
+```{r setup}
+##Set knitr options (show both code and output, show output w/o leading #, make figures smaller, hold figures until after chunk)
+knitr::opts_chunk$set(echo=TRUE, include=TRUE, comment=NA, fig.height=3, fig.width=4.2, fig.show="hold")
+Sys.setlocale("LC_CTYPE", "Russian") #to make sure my text is not gibberish, readable
+```
+
+## Steps for completing this final project
+
+I will write down the steps from the final goal back to the beginning
+
+1.Conduct a cluster analysis and determine which lexical complexity measures are typical for each proficiency level in WPT
+
+2. Measure lexical complexity measures in all texts. Some people have written up to three texts. It means I need to combine and average their scores and then input it into the cluster analysis
+
+3. Upload the corpus, create a dataframe with texts and names. 
+
+
+
+
+## What I need to install to run the codes?
+
+```{r}
+library(tidyverse)
+#install.packages('quanteda') to work with a corpus
+library(quanteda)
+#install.packages("htmlwidgets") to work with strings and regular expressions
+library(htmlwidgets)
+# install.packages('tidytext') to be able to perform tokenization
+library(tidytext)
+#install.packages('corpus')
+library(corpus) #To split the text into sentences
+#install.packages('spacyr')
+library(spacyr) #to be able to count the T-units
+
+```
+
+## Loading a corpus
+
+```{r}
+#From https://www.youtube.com/watch?v=pFinlXYLZ-A
+folderPre0 <- "C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/2019_Standardized/2019_PreTest_ST/Pre_test_Prompt0_Planning_dinner_party_ST"
+filelistPre0_orig <- list.files(path = folderPre0, pattern = ".*.txt")
+filelistPre0_orig
+filelistPre0 <- paste(folderPre0, "/", filelistPre0_orig, sep = "")
+filelistPre0
+filelistPre0texts <- lapply(filelistPre0, FUN = readLines, encoding = "UTF-8", warn = FALSE)
+textsPre0 <- lapply(filelistPre0texts, FUN = paste, collapse = " ") %>% 
+  str_remove_all("unclear")
+textsPre0
+```
+
+## Cleaning the corpus
+
+Next, I want to get rid of the word "unclear" and I want to create a tibble with the names of texts.
+
+```{r}
+#Another option proposed by Dan is above
+#stopwords = "unclear"
+#removeWords <- function(str, stopwords) {
+ # x <- unlist(strsplit(str, " "))
+  #paste(x[!x %in% stopwords], collapse = " ")
+#}
+
+#textsPre0 <- lapply(textsPre0, FUN = removeWords, stopwords) #Success!!!
+#textsPre0
+class(textsPre0) #The class is list. How do I move on from here?
+
+
+corpus_df <- tibble(text = unlist(textsPre0), Student = 1:8)
+corpus_df #Success. 
+
+```
+## How to load all texts and WPT ratings?
+
+I know how to load a number of texts, but I need to also indicate the author and their rating. I guess it will happen a little bit later in the process.
+
+## Calculating and adding lexical complexity measures to the corpus_df
+
+```{r}
+# How do I create a tidy text? Let's see
+corpus_df_tidy <- corpus_df %>% 
+  mutate(text = gsub(x = text, pattern = "\\-\\s", replacement = "")) %>% #what to do is lonely dashes? 
+  unnest_tokens(word, text, token = "regex", pattern = "[\\s,\\.\\?!\\(\\)\\:\";]") #let me check if words look like real words in all these 8 texts
+corpus_df_tidy %>% 
+  filter(str_detect(word, "-")) #Success! 
+```
+
+### Lexical density
+
+```{r}
+RusConjCoord2 <- readLines("additional_documents/Russian_conjunctions_COORD.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>") 
+RusPrep2 <- readLines("additional_documents/Russian_prepositions.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>") 
+RusConjSubord2 <- readLines("additional_documents/Russian_conjunctions_SUBORD.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>")
+RusInter2 <- readLines("additional_documents/Russian_interjections.txt", encoding = "UTF-8", warn = FALSE) %>%
+  str_remove_all("<.+>")
+RusPrtcl2 <- readLines("additional_documents/Russian_particles.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>") 
+AllnonLEX <- c(RusConjCoord2, RusPrep2, RusConjSubord2, RusInter2, RusPrtcl2) 
+AllnonLEX_df <- tibble(word = AllnonLEX) #This column name should be the same for using the anti-join()
+AllnonLEX_df #Success! 
+```
+
+I am not sure what is next. Let's try writing the function for lexical density
+
+```{r}
+lexical_words <- function(x){
+ lexical_words <- anti_join(x, AllnonLEX_df, by = "word")
+   return(lexical_words)
+}
+
+#lexical_words(corpus_df_tidy$word) Spits out TRUE and FALSE, not what I want
+
+#lexical_density <- function(x){
+ # density <- nrow(lexical_words(x))/nrow(x)
+  #return(density)
+#}
+
+#corpus_df_tidy %>% 
+ # group_by(names) %>% 
+  #summarize(lexical_density = lexical_density()) 
+
+
+#This is not working. Let's try something else
+corpus_df_tidy %>% 
+  anti_join(AllnonLEX_df, by = "word") %>% 
+  count(word, sort = TRUE) #The most frequent lexical word is я - can be expected. Do I get rid of pronouns? Let me think
+
+new_corpus2 <-corpus_df_tidy %>% 
+  group_by(Student) %>% 
+  summarize(total_words = n(),
+         lexical_words = sum(!word %in% AllnonLEX_df$word),
+         lexical_density = lexical_words/total_words)
+
+new_corpus2 #Let's check at least one number from this result The result for text 1 is 6.203125 Why is is the wrong number. Let's check each output
+
+corpus_df_tidy %>% 
+  group_by(Student) %>% 
+  summarize(nrow = nrow(lexical_words(corpus_df_tidy)))
+```
+
+```{r}
+#Checking the output above. Let's upload one text
+text1 <- readLines("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/2019_Standardized/2019_PreTest_ST/Pre_test_Prompt0_Planning_dinner_party_ST/Addison_Mitchell_Entry0_ST.txt", encoding = "UTF-8") %>% str_remove_all("unclear")
+text1_df <- tibble(text = text1, Student = 1)
+text1_df_tidy <- unnest_tokens(text1_df, word, text)
+text1_df_tidy
+
+# Lexical density
+nrow(lexical_words(text1_df_tidy))/nrow(text1_df_tidy) #The result for text 1 is 0.796875 Why is it different?
+
+lexical_words(text1_df_tidy) %>% nrow() #The answer is 51 lexical words
+#what about all the words in the text?
+nrow(text1_df_tidy) #The answer is 64 
+51/64 #The result should be 0.79
+```
+

@@ -27,6 +27,12 @@ library(tidytext)
 library(corpus) #To split the text into sentences
 #install.packages('spacyr')
 library(spacyr) #to be able to count the T-units
+#install.packages("koRpus")
+#install.koRpus.lang(c("en","ru"))
+#available.koRpus.lang()
+library(koRpus) #I hope this package helps me calculate MTLD
+library(koRpus.lang.ru)
+library(koRpus.lang.en)
 ```
 
 ## Loading and tokenizing one text in L2 Russian
@@ -44,7 +50,7 @@ removeWords <- function(str, stopwords) {
 text1clean <- removeWords(text1, stopwords)
 text1clean #success! I was able to remove the words "unclear" from the text in Russian.
 
-#Not to the future me: I need to make sure I remove everything between <> in my texts. I don't have comments in text1 but there are comments in other texts. Maybe use str_remove_all("<.+>")?
+#Note to the future me: I need to make sure I remove everything between <> in my texts. I don't have comments in text1 but there are comments in other texts. Maybe use str_remove_all("<.+>")?
 
 text1_df <- tibble(text = text1clean) #I use this dataframe for my rsyntax dependency analysis and other syntactic complexity measures. 
 text1_df #Success
@@ -57,6 +63,17 @@ tidy_text1 #Success But I need каким-то to be one word. Overall, all punc
 #The count function can help me identify stopwords for my analysis
 tidy_text1 %>% 
   count(word, sort = TRUE) 
+
+#Let's try Dan's proposal
+text1 <- readLines("data/text1.txt", encoding = "UTF-8") %>% 
+  str_remove_all("unclear")
+
+text1_df <- tibble(text = text1)
+
+text1_df %>% 
+  unnest_tokens(word, text, token = "regex", pattern = "[\\s,\\.\\?!]") #Success! каким-то is one word now
+
+tokenize("data/text1.txt", lang = "ru", doc_id = "sample")# I don't like this output, the token column is gibberish
 
 ```
 Let me now try to measure complexity measures in one text. I have chosen the list of lexical and syntactic complexity measures based on the book by Barkaoui and Hadidi (2020). They understand lexical complexity as "the richness of a writer's lexicon" (p. 13) and divide it into four components: *lexical density*, *lexical variation*, *lexical sophistication*, and *lexical bundles*. As for syntactic complexity, it is understood as "grammatical variation and sophistication" (Wolfe-Quintero et al., 1998, p. 45). It is also a multi-dimensional construct and includes *global complexity*, *complexity by coordination*, *complexity by subordination*, *clausal complexity*, and *structural variety*.
@@ -164,18 +181,18 @@ I need to calculate T-units or clauses per sentence. The good news is I can calc
 # spacy_download_langmodel("ru_core_news_sm") # Success!
 
 parsed_text1 <- spacy_parse(text1, lemma = FALSE, entity = TRUE, nounphrase = TRUE) 
-entity_extract(parsed_text1) # This can be used to anonymize the texts BUT it contains a lot of mistakes
-spacy_parse(text1, dependency = TRUE, pos = FALSE) #Looks amazing BUT contains a lot of mistakes
-entity_consolidate(parsed_text1) # Only some entities are consolidated
-nounphrase_extract(parsed_text1) # Mostly incorrect
-nounphrase_consolidate(parsed_text1) #Too many mistakes for the Russian lge
-#Integration with quanted
-ntoken(parsed_text1) #That is more than number of words. I guess it includes all the punctuation
-ntype(parsed_text1)
+head(entity_extract(parsed_text1)) # This can be used to anonymize the texts BUT it contains a lot of mistakes
+head(spacy_parse(text1, dependency = TRUE, pos = FALSE)) #Looks amazing BUT contains a lot of mistakes
+head(entity_consolidate(parsed_text1)) # Only some entities are consolidated
+head(nounphrase_extract(parsed_text1)) # Mostly incorrect
+head(nounphrase_consolidate(parsed_text1)) #Too many mistakes for the Russian lge
+#Integration with quanteda
+head(ntoken(parsed_text1)) #That is more than number of words. I guess it includes all the punctuation
+head(ntype(parsed_text1))
 #How to select only nouns
 spacy_parse(text1, pos = TRUE) %>%
     as.tokens(include_pos = "pos") %>%
-    tokens_select(pattern = c("*/NOUN")) #It shows everything as a noun. It is crazy
+    tokens_select(pattern = c("*/NOUN")) %>% head() #It shows everything as a noun. It is crazy
 ```
 
 Let me try the udpipe package. 
@@ -189,7 +206,7 @@ udmodel_rus <- udpipe_load_model(file = "additional_documents/russian-gsd-ud-2.5
 
 y <- udpipe_annotate(udmodel_rus, x = text1_df$text)
 y <- as.data.frame(y)
-y #I think I like this ouput. Let's continue
+y#I think I like this output. Let's continue
 
 #install.packages('rsyntax') #From https://www.rdocumentation.org/packages/rsyntax/versions/0.1.2
 library(rsyntax)
@@ -209,7 +226,9 @@ tokens[,c('doc_id','sentence','token','clause','clause_fill')] #This seems to wo
 Can I find all simple clauses? Is it even necessary? But let me try
 
 ```{r}
-#simple = tquery(label = )
+text1
+y %>% filter(dep_rel == "nsubj")
+
 ```
 
 # Final notes

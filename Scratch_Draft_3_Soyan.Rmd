@@ -1,0 +1,75 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# How to load a corpus of texts?
+
+```{r setup}
+##Set knitr options (show both code and output, show output w/o leading #, make figures smaller, hold figures until after chunk)
+knitr::opts_chunk$set(echo=TRUE, include=TRUE, comment=NA, fig.height=3, fig.width=4.2, fig.show="hold")
+Sys.setlocale("LC_CTYPE", "Russian") #to make sure my text is not gibberish, readable
+```
+
+## What I need to install to run the codes?
+
+```{r}
+library(tidyverse)
+#install.packages('quanteda') to work with a corpus
+library(quanteda)
+#install.packages("htmlwidgets") to work with strings and regular expressions
+library(htmlwidgets)
+# install.packages('tidytext') to be able to perform tokenization
+library(tidytext)
+#install.packages('corpus')
+library(corpus) #To split the text into sentences
+#install.packages('spacyr')
+library(spacyr) #to be able to count the T-units
+
+```
+
+## Loading a corpus
+
+```{r}
+#RusCorpus2019 <- readLines("2019_PreTest_ST", encoding = "UTF-8") didn't work out
+#A suggestion from here - https://stackoverflow.com/questions/3397885/how-do-you-read-multiple-txt-files-into-r
+#filelist = list.files(pattern = ".*.txt")
+#filelist
+#?list.files
+#datalist = lapply(filelist, FUN=read.table, header=TRUE, warn = FALSE) 
+#assuming the same header/columns for all files
+#datafr = do.call("rbind", datalist) #didn't work out. Let me try something else
+
+#From https://www.tidytextmining.com/usenet.html
+#PreTestPrompt0<- "C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/2019_Standardized/2019_PreTest_ST/Pre_test_Prompt0_Planning_dinner_party_ST"
+#PreTestPrompt0 <- list.files(path = "C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/2019_Standardized/2019_PreTest_ST/Pre_test_Prompt0_Planning_dinner_party_ST", pattern = ".*.txt")
+
+# Define a function to read all files from a folder into a data frame
+#read_folder <- function(infolder) {
+ # tibble(file = dir(infolder, full.names = TRUE)) %>%
+  #  mutate(text = map(file, read_lines)) %>%
+   # transmute(id = basename(file), text) %>%
+    #unnest(text)
+#}
+
+# Use unnest() and map() to apply read_folder to each subfolder
+#raw_text <- tibble(folder = dir(PreTestPrompt0, full.names = TRUE)) %>%
+ # mutate(folder_out = map(folder, read_folder)) %>%
+  #unnest(cols = c(folder_out)) %>%
+  #transmute(newsgroup = basename(folder), id, text)
+
+#raw_text #Didn't work Let's try something else
+
+
+```
+
+```{r}
+#From https://www.youtube.com/watch?v=pFinlXYLZ-A
+folderPre0 <- "C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/2019_Standardized/2019_PreTest_ST/Pre_test_Prompt0_Planning_dinner_party_ST"
+filelistPre0 <- list.files(path = folderPre0, pattern = ".*.txt")
+filelistPre0
+filelistPre0 <- paste(folderPre0, "/", filelistPre0, sep = "")
+filelistPre0
+lapply(filelistPre0, FUN = readLines, encoding = "UTF-8", warn = FALSE)
+```
+

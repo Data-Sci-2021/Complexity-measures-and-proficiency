@@ -1,3 +1,10 @@
+# Progress report # 4 (12/02/2021)
+1. I uploaded 24 texts written by 8 students as my data. I chose four intermediate level students and four advanced level students. Since I was running out of time before the end of the semester, it turned out to be difficult to figure out how to anonymize my original files, that is, the planned 300 texts. For this final project, I created a dataframe with the 24 texts and proficiency levels.
+2. I calculated all three lexical complexity measures for 24 texts. I was able to create dataframes for two complexity measures. I am not sure how to convert answers for MLTD into a tibble with 24 slots.
+3. I joined my original dataframe with dataframes indicating lexical density and lexical sophistication. Once I figure out what to do with MLTD, my dataframe will be ready for the cluster analysis (see Draft_3_NEW_REPLACEMENT).
+4. I started reading how to perform the cluster analysis.
+
+
 # Progress report # 3 (11/19/2021)
 1. The most important part of my progress was figuring out how to make sure that the gibberish output is not gibberish. Dan helped me with that - Sys.setlocale("LC_CTYPE", "Russian"). Overall, I always had to take additional steps to download models for the Russian language with many packages because everything is by default for English texts. 
 2. I was making stupid mistakes a lot of the time. Most of my functions would refuse to work because I would leave show() in the end of my commands.
