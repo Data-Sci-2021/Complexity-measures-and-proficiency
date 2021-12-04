@@ -109,7 +109,7 @@ Manual check
 
 ```{r}
 316+278+282 #matches
-(0.7246835 + 0.7877698 + 0.7517730)/3  #  The number here 0.7547421 while the number below is 0.7534247. I need to think about these two numbers
+(0.7246835 + 0.7877698 + 0.7517730)/3  #  Good enough
 ```
 
 
@@ -165,6 +165,24 @@ MTLD(S1_E1) #Success! The number matches the number from above - 175.36
    #                 70.71 (complete factors only)
 
 #Note: Analysis was conducted case insensitive.
+
+filelist %>% 
+  map(tokenize, fileEncoding = "UTF-8", lang = "ru") %>% 
+  map(MTLD) %>% 
+  map(attr, "MTLD") #it still spits out a lot of numbers. For now, I will just a vector manually, and I will think about figuring out the automatization later on.
+
+MTLDs <- c(175.36, 210.55, 98.27, 152.57, 195.18, 65.09, 103.33, 135.09, 107.63, 195.88, 215.79, 126, 130.99, 189.28, 114.34, 132.16, 110.72, 212, 85.26, 116.43, 92.46, 138.16, 185.48, 157.07)
+
+#Now I need to merge the vector with the student names and create a df with 8 rows
+corpus_df4 <- corpus_df3 %>% 
+  mutate(MTLD = MTLDs)
+
+corpus_with_MTLDs_tog <- corpus_df4 %>% 
+  group_by(Student) %>% 
+  summarize(MTLD_tog = mean(MTLD))
+
+corpus_with_MTLDs_tog
+
 ```
 
 ### Lexical sophistication
@@ -194,19 +212,125 @@ AWL_tog #Success! Seems acceptable
 I need to input my students' names, their proficiency and numbers for their lexical complexity measures
 
 ```{r}
-df_for_clustering <- corpus_df3 %>% 
+df_for_clustering_sep <- corpus_df3 %>% 
   full_join(df_LexDens_sep) %>% 
-  full_join(AWL_sep) #I don't know how to create an MTLD tibble NOT manually yet
+  full_join(AWL_sep) %>% 
+  #I need to attach the MTLDs vector
+  mutate(MTLD = MTLDs)
+
+df_for_clustering_sep # I realized that student essays should be looked at together since their proficiency score is given based on their three essays together, not separately.
+
+#I can look at the essays separately to see if a different trend will be revealed. What happens when we have 24 observations? This is not theoretically motivated but let's try
+
+df_for_clustering_tog <- corpus_with_MTLDs_tog %>% 
+  full_join(df_LexDens_tog) %>% 
+  full_join(AWL_tog) 
+
+df_for_clustering_tog 
+  
 ```
 
-## An attempt to do the cluster analysis (no progress yet)
+## An attempt to do the cluster analysis 
 
-I am not sure where to begin. What I want to do is to see if lexical density, lexical sophistication, and lexical variation produce a cluster typical for Intermediate or Advanced proficiency levels, how lexical complexity measures match the proficiency levels. I want to conduct hierarchical cluster analysis similar to Jarvis et al.(2003). They had more data points and linguistic features, but my project is a pilot project.  
+### Attempt #1 with 8 observations
+
+I want to do is to see if lexical density, lexical sophistication, and lexical variation produce a cluster typical for Intermediate or Advanced proficiency levels, how lexical complexity measures match the proficiency levels. I want to conduct hierarchical cluster analysis similar to Jarvis et al.(2003). They had more data points and linguistic features, but my project is a pilot project.  
+From https://www.datacamp.com/community/tutorials/hierarchical-clustering-R
+ - I need to scale my data points
+ - Then, I can perform hierarchical cluster analysis
+ - Last, I need to measure the goodness of clusters
 
 ```{r}
-#From https://www.datacamp.com/community/tutorials/hierarchical-clustering-R
-#I need to scale my data points
+#I already have my dataframe df_for_clustering_tog
+str(df_for_clustering_tog)
+summary(df_for_clustering_tog)
+any(is.na(df_for_clustering_tog)) #I knew my df pretty well but I checked it anyway
+#I need proficiency information to check how good the clustering is at the end
+Stud_Prof <- tibble(Student = df_for_clustering_tog$Student) %>% 
+  mutate(Proficiency = ifelse(grepl("[1-4]", Student), "Intermediate", "Advanced"))
+Stud_Prof_label <- Stud_Prof$Proficiency
 ```
+
+The website tells me that I need to have all my numerical values scaled.
+
+```{r}
+#Actually, I need only three columns
+df_three_columns <- df_for_clustering_tog %>% 
+  select(MTLD_tog, lexical_density, AWL)
+df_three_columns
+#Now I am scaling the column values
+df_cluster_sc <- as.data.frame(scale(df_three_columns))
+summary(df_cluster_sc) #Mean for all the columns is 0 and the SD should be one
+```
+
+Now I need to build the distance matrix
+
+```{r}
+dist_mat <- dist(df_cluster_sc, method = 'euclidean') #Since all the values here are continuous numerical values, I need to use the euclidean distance method
+#Following the website, I am trying out the average linkage method. The dendrogram is built via the hierarchical cluster object with the hclust() function.
+hclust_avg <- hclust(dist_mat, method = 'average')
+plot(hclust_avg)
+```
+
+I need to cut the dendogram into two clusters since I have two proficiency levels, Intermediate and Advanced. The cutree() function is used to cut the tree.
+
+```{r}
+cut_avg <- cutree(hclust_avg, k = 2)
+#The illustration is not working. Maybe two clusters is too much of an imposition
+#rect.hclust(hclust_avg , k = 2) #The rect.hclust() superimposes rectangular compartments for each cluster on the trr
+#abline(h = 2, col = 'red') #The abline() function draws the cut line
+```
+
+Another attempt at illustration
+
+```{r}
+#install.packages('dendextend', dependencies = TRUE)
+suppressPackageStartupMessages(library(dendextend))
+avg_dend_obj <- as.dendrogram(hclust_avg)
+avg_col_dend <- color_branches(avg_dend_obj, h = 2)
+plot(avg_col_dend) #This looks nice
+```
+
+I am continuing doing what the website tells me to do.
+
+```{r}
+#The code below will help me to count how many observations are in each cluster. Since I have only 8 observations, this is not so important, but with hundreds of observations, this step would be extremely important.
+texts_df_cl <- mutate(df_three_columns, cluster = cut_avg)
+count(texts_df_cl, cluster) #This is an interesting answer. 
+table(texts_df_cl$cluster,Stud_Prof_label) # 3 out of 8 observations were incorrectly clustered. I am not sure where to move from here.
+```
+
+### Attempt #2 
+Let's see what will happen when we have 24 observations. Since the proficiency level depends on all three essays, this approach is not an accurate approach, but I will try it anyway.
+
+```{r}
+#Checking
+str(df_for_clustering_sep)
+summary(df_for_clustering_sep)
+any(is.na(df_for_clustering_sep)) 
+#I need proficiency information to check how good the clustering is at the end
+Stud_Prof_label_sep <- df_for_clustering_sep$Proficiency 
+#I need only three columns
+cluster_sep_numerical <- df_for_clustering_sep %>% 
+  select(AWL, MTLD, lexical_density)
+cluster_sep_numerical
+#Now I am scaling the column values
+df_cluster_sc_sep <- as.data.frame(scale(cluster_sep_numerical))
+summary(df_cluster_sc_sep) 
+dist_mat_sep <- dist(df_cluster_sc_sep, method = 'euclidean') #Since all the values here are continuous numerical values, I need to use the euclidean distance method
+#Following the website, I am trying out the average linkage method. The dendrogram is built via the hierarchical cluster object with the hclust() function.
+hclust_avg_sep <- hclust(dist_mat_sep, method = 'average')
+plot(hclust_avg_sep)
+avg_dend_obj_sep <- as.dendrogram(hclust_avg_sep)
+avg_col_dend_sep <- color_branches(avg_dend_obj_sep, h = 2)
+plot(avg_col_dend_sep) #This looks interesting. Text 15 is apparently very different from the rest of texts
+cut_avg_sep <- cutree(hclust_avg_sep, k = 2)
+#Checking the model
+texts_df_cl_sep <- mutate(cluster_sep_numerical, cluster = cut_avg_sep)
+count(texts_df_cl_sep, cluster) #This is an interesting answer.
+table(texts_df_cl_sep$cluster, Stud_Prof_label_sep) #This model is worse when everything is separate. What this tells me that lexical complexity measures of the texts in the corpus written by 8 students are very similar. MTLDs, AWLs, lexical density in these texts was not the defining characteristic in their rating. 
+```
+
 
 # Final notes
 ```{r}
