@@ -80,15 +80,16 @@ corpus_df_tidy %>%
 These files are the lists of non-lexical words that I have created
 
 ```{r}
-RusConjCoord2 <- readLines("additional_documents/Russian_conjunctions_COORD.txt", encoding = "UTF-8", warn = FALSE) %>% 
+getwd()
+RusConjCoord2 <- readLines("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/non_lexical_items_for_lex_density/Russian_conjunctions_COORD.txt", encoding = "UTF-8", warn = FALSE) %>% 
   str_remove_all("<.+>") 
-RusPrep2 <- readLines("additional_documents/Russian_prepositions.txt", encoding = "UTF-8", warn = FALSE) %>% 
+RusPrep2 <- readLines("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/non_lexical_items_for_lex_density/Russian_prepositions.txt", encoding = "UTF-8", warn = FALSE) %>% 
   str_remove_all("<.+>") 
-RusConjSubord2 <- readLines("additional_documents/Russian_conjunctions_SUBORD.txt", encoding = "UTF-8", warn = FALSE) %>% 
+RusConjSubord2 <- readLines("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/non_lexical_items_for_lex_density/Russian_conjunctions_SUBORD.txt", encoding = "UTF-8", warn = FALSE) %>% 
   str_remove_all("<.+>")
-RusInter2 <- readLines("additional_documents/Russian_interjections.txt", encoding = "UTF-8", warn = FALSE) %>%
+RusInter2 <- readLines("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/non_lexical_items_for_lex_density/Russian_interjections.txt", encoding = "UTF-8", warn = FALSE) %>%
   str_remove_all("<.+>")
-RusPrtcl2 <- readLines("additional_documents/Russian_particles.txt", encoding = "UTF-8", warn = FALSE) %>% 
+RusPrtcl2 <- readLines("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/non_lexical_items_for_lex_density/Russian_particles.txt", encoding = "UTF-8", warn = FALSE) %>% 
   str_remove_all("<.+>") 
 AllnonLEX <- c(RusConjCoord2, RusPrep2, RusConjSubord2, RusInter2, RusPrtcl2) 
 AllnonLEX_df <- tibble(word = AllnonLEX) #This column name should be the same for using the anti-join()
@@ -104,6 +105,7 @@ df_LexDens_sep <-corpus_df_tidy %>%
          lexical_density = lexical_words/total_words)
 
 df_LexDens_sep
+sum(df_LexDens_sep$total_words)
 ```
 Manual check
 
