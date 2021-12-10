@@ -67,8 +67,8 @@ I need to tokenize my texts
 
 ```{r}
 corpus_df_tidy <- corpus_df3 %>% 
-  mutate(text = gsub(x = text, pattern = "\\-\\s", replacement = "")) %>% #to make sure there are no lonely dashes as token
-  unnest_tokens(word, text, token = "regex", pattern = "[\\s,\\.\\?!\\(\\)\\:\";]") #let me check if words look like real words in all these 8 texts
+  mutate(text = gsub(x = text, pattern = "\\-\\s", replacement = "")) %>% #to make sure there are no lonely dashes as tokens
+  unnest_tokens(word, text, token = "regex", pattern = "[\\s,\\.\\?!\\(\\)\\:\";]") 
 corpus_df_tidy %>% 
   filter(str_detect(word, "-")) #Success! 60 words have been identified as 1 word, not two. That's great!
 ```
