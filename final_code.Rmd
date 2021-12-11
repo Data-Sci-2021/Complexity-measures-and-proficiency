@@ -1,0 +1,253 @@
+---
+title: "final_code"
+author: "Rossina Soyan"
+date: "12/10/2021"
+output:   
+  github_document: 
+    toc: TRUE
+---
+
+```{r setup}
+##Set knitr options (show both code and output, show output w/o leading #, make figures smaller, hold figures until after chunk)
+knitr::opts_chunk$set(echo=TRUE, include=TRUE, comment=NA, fig.height=3, fig.width=4.2, fig.show="hold")
+Sys.setlocale("LC_CTYPE", "Russian") #to make sure my text is not gibberish, readable in Rmd
+```
+
+**Note**: The knitted file still shows gibberish texts, but setting the locale helped me read the texts within R studio.
+
+# Packages for calculating lexical complexity measures
+
+```{r}
+#install.packages("tidyverse") to be able to use dplyr and tibble
+library(tidyverse)
+#install.packages('tidytext') to be able to perform tokenization of texts
+library(tidytext)
+#install.packages("koRpus") to be able to calculate MTLD
+#install.koRpus.lang(c("en","ru"))
+library(koRpus)
+library(koRpus.lang.ru)
+library(koRpus.lang.en)
+```
+
+# Loading the corpus and tokenization of the texts
+
+I decided to upload texts written by 8 randomly chosen students. 4 of them were rated as Intermediate and 4 were rated as Advanced. Each student submitted 3 texts as part of their placement exam, it means that the current corpus consists of 24 texts. I followed the instructions for loading txt files from this [youtube tutorial](https://www.youtube.com/watch?v=pFinlXYLZ-A).
+
+```{r}
+#How to load the texts 
+folder <- "C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/data" 
+filelist_orig <- list.files(path = folder, pattern = ".*.txt")
+filelist <- paste(folder, "/", filelist_orig, sep = "")
+filelistTexts <- lapply(filelist, FUN = readLines, encoding = "UTF-8", warn = FALSE) #to load the txt files
+texts <- lapply(filelistTexts, FUN = paste, collapse = " ") %>% 
+  str_remove_all("unclear") #I deleted the word "unclear" from the texts
+```
+
+I created a tibble with texts and names. I added the proficiency column using the instructions from [Winter's textbook](https://rstudio-pubs-static.s3.amazonaws.com/116317_e6922e81e72e4e3f83995485ce686c14.html#/9)
+
+```{r}
+corpus_df <- tibble(text = texts, Student = filelist_orig)
+# I need to separate students and their essay ids
+corpus_df2 <- corpus_df %>% 
+  separate(Student, c("Student", "Entry"))
+#I need to add their proficiency ratings. 
+corpus_df3 <- mutate(corpus_df2, Proficiency = ifelse(grepl("[1-4]", Student), "Intermediate", "Advanced")) #Now I have four columns in the tibble
+```
+
+I tokenized my texts.
+
+```{r}
+corpus_df_tidy <- corpus_df3 %>% 
+  mutate(text = gsub(x = text, pattern = "\\-\\s", replacement = "")) %>% #to make sure there are no lonely dashes as tokens
+  unnest_tokens(word, text, token = "regex", pattern = "[\\s,\\.\\?!\\(\\)\\:\";]") #to make sure that hyphenated words are counted as one token
+head(corpus_df_tidy) #Success! 
+```
+
+# Calculating lexical complexity measures
+
+I decided to calculate lexical complexity measures for each student, not for each text since proficiency ratings are given to individual students based on all the texts they have submitted. An individual essay does not get a separate proficiency rating.
+
+## Lexical density 
+
+I loaded txt files with non-lexical words that I have created on my own.
+
+```{r}
+#The five txt files
+RusConjCoord <- readLines("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/non_lexical_items_for_lex_density/Russian_conjunctions_COORD.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>") 
+RusPrep <- readLines("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/non_lexical_items_for_lex_density/Russian_prepositions.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>") 
+RusConjSubord <- readLines("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/non_lexical_items_for_lex_density/Russian_conjunctions_SUBORD.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>")
+RusInter <- readLines("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/non_lexical_items_for_lex_density/Russian_interjections.txt", encoding = "UTF-8", warn = FALSE) %>%
+  str_remove_all("<.+>")
+RusPrtcl <- readLines("C:/Users/Rossina/Documents/CMU_student/3_Fall_2021/Statistics_at_Pitt/Complexity-measures-and-proficiency/non_lexical_items_for_lex_density/Russian_particles.txt", encoding = "UTF-8", warn = FALSE) %>% 
+  str_remove_all("<.+>") 
+#I need to combine all non-lexical words
+AllnonLEX <- c(RusConjCoord, RusPrep, RusConjSubord, RusInter, RusPrtcl) 
+AllnonLEX_df <- tibble(word = AllnonLEX) #This column name (word) should be the same as in corpus_df_tidy to make it easier to perform other functions later
+head(AllnonLEX_df) #Success! 
+```
+
+And now I can calculate lexical density, that is, calculate the ratio of lexical words to total words. 
+
+```{r}
+df_LexDens_tog <-corpus_df_tidy %>% 
+  group_by(Student) %>% 
+  summarize(total_words = n(),
+         lexical_words = sum(!word %in% AllnonLEX_df$word),
+         lexical_density = lexical_words/total_words)
+
+df_LexDens_tog #Success! 
+```
+
+But there are no clear differences between intermediate and advanced students. At a cursory glance, intermediate students  seem to have higher lexical density than advanced students which contradicts the hypothesis that higher lexical density corresponds to higher proficiency. 
+
+## Lexial variation
+
+Lexical variation is often measured using the type-token ratio (TTR) but since the TTR is affected by text length, researchers started using Measure of Textual Lexical Diversity (MTLD) instead. MTLD was shown to produce more stable results across texts despite differences in text length (Kojima & Yamashita, 2014). According to the koRpus package, MTLD is "the total number of tokens divided by the number of factors" (p. 60) Factors are based on segments of varying length, minimum 9 tokens. MTLD is the average of TTRs based on factors counted forward and backward. 
+
+```{r}
+#I am expected to tokenize the texts within the tokenize function of the koRpus package
+filelist %>% 
+  map(tokenize, fileEncoding = "UTF-8", lang = "ru") %>% 
+  map(MTLD) %>% 
+  map(attr, "MTLD") %>% 
+  head() #Sorry for the long output. I don't know how to make it shorter.
+#I also don't know how to filter out the word "unclear" and how to create a dataframe with the MTLD numbers. I decided to create an MTLD vector manually.
+MTLDs <- c(175.36, 210.55, 98.27, 152.57, 195.18, 65.09, 103.33, 135.09, 107.63, 195.88, 215.79, 126, 130.99, 189.28, 114.34, 132.16, 110.72, 212, 85.26, 116.43, 92.46, 138.16, 185.48, 157.07)
+#Now I need to merge the vector with the student names and create a df with 8 rows
+corpus_df4 <- corpus_df3 %>% 
+  mutate(MTLD = MTLDs)
+
+corpus_with_MTLDs_tog <- corpus_df4 %>% 
+  group_by(Student) %>% 
+  summarize(MTLD_tog = mean(MTLD))
+
+corpus_with_MTLDs_tog #Success! Again, the lowest MTLD is among the Advanced students, not among the Intermediate students. My original hypotheses are contradicted by empirical data.
+
+```
+
+I can also compare the MTLD results with the TTR results just to see if the differences between the two measures.
+
+```{r}
+df_for_TTR_types <- corpus_df_tidy %>% 
+    group_by(Student) %>% 
+    count(word) %>% 
+    summarise(types = n()) 
+
+df_for_TTR_tokens  <- df_LexDens_tog %>% 
+  group_by(Student) %>% 
+  select(tokens = total_words)
+
+TTR_tog <- df_for_TTR_types %>% 
+  full_join(df_for_TTR_tokens, by = "Student") %>% 
+  mutate(TTR = types/tokens) 
+
+TTR_tog 
+```
+
+I think types are more meaningful for L2 English texts because Russian is more morphologically rich than English. Maybe lemmas would have been a better measure of lexical variation than types for L2 Russian texts.
+The TTR results are vastly different than MLTD results. The hypothesis is the higher the TTR, the higher proficiency. As it can be expected, the student with the shortest texts showed the highest TTR. Again, two intermediate level students have higher TTR than advanced level students.
+
+## Lexical sophistication
+
+Lexical sophistication is measured using the average word length. I need to calculate the length of each word, add everything up and divide by the number of words in each text. 
+
+```{r}
+AWL_tog <-corpus_df_tidy %>% 
+  group_by(Student) %>% 
+  summarize(total_words = n(),
+         total_word_length = sum(str_length(word)),
+         AWL = total_word_length/total_words)
+AWL_tog #Success! No clear differences between Intermediate and Advanced students. 
+```
+
+## A dataframe with all lexical complexity measures 
+
+I created a dataframe with my students' names, their proficiency level and their lexical complexity measures
+
+```{r}
+df_for_clustering_tog <- corpus_with_MTLDs_tog %>% 
+  full_join(df_LexDens_tog) %>% 
+  full_join(AWL_tog) 
+
+df_for_clustering_tog #Success!
+```
+
+# The cluster analysis 
+
+I want to see if lexical density, lexical sophistication, and lexical variation produce a cluster typical for Intermediate and Advanced proficiency levels, how lexical complexity measures match the ACTFL proficiency levels. I want to conduct hierarchical cluster analysis similar to Jarvis et al. (2003). They had more data points and linguistic features, but my project is a pilot project on L2 Russian texts.  
+From [datacamp tutorial](https://www.datacamp.com/community/tutorials/hierarchical-clustering-R)
+<li type=disc> I need to scale my data points
+<li type=disc> Then, I can perform hierarchical cluster analysis
+<li type=disc>  Last, I need to measure the goodness of clusters
+ 
+```{r}
+#I already have my dataframe df_for_clustering_tog
+str(df_for_clustering_tog)
+summary(df_for_clustering_tog)
+any(is.na(df_for_clustering_tog)) #I knew my df pretty well but I checked it anyway
+#I need proficiency information to check how good the clustering is at the end
+Stud_Prof <- tibble(Student = df_for_clustering_tog$Student) %>% 
+  mutate(Proficiency = ifelse(grepl("[1-4]", Student), "Intermediate", "Advanced"))
+Stud_Prof_label <- Stud_Prof$Proficiency
+```
+
+I scaled the numerical values.
+
+```{r}
+#I need only three columns
+df_three_columns <- df_for_clustering_tog %>% 
+  select(MTLD_tog, lexical_density, AWL)
+df_three_columns
+#Now I am scaling the column values
+df_cluster_sc <- as.data.frame(scale(df_three_columns))
+summary(df_cluster_sc) #Mean for all the columns is 0 and the SD should be one
+```
+
+I built the distance matrix. I tried out the average linkage method. The dendrogram was built via the hierarchical cluster object with the hclust() function.
+
+```{r}
+dist_mat <- dist(df_cluster_sc, method = 'euclidean') #Since all the values here are continuous numerical values, I need to use the euclidean distance method
+hclust_avg <- hclust(dist_mat, method = 'average')
+plot(hclust_avg)
+```
+
+I cut the dendrogram into two clusters using the cutree() function since I have two proficiency levels, Intermediate and Advanced. 
+
+```{r}
+cut_avg <- cutree(hclust_avg, k = 2)
+```
+
+Another illustration which I think is prettier.
+
+```{r}
+#install.packages('dendextend', dependencies = TRUE)
+suppressPackageStartupMessages(library(dendextend))
+avg_dend_obj <- as.dendrogram(hclust_avg)
+avg_col_dend <- color_branches(avg_dend_obj, h = 2)
+plot(avg_col_dend) #This looks nice
+```
+
+```{r}
+#The code below will help me count how many observations are in each cluster
+texts_df_cl <- mutate(df_three_columns, cluster = cut_avg)
+count(texts_df_cl, cluster) #This is an interesting answer. 
+table(texts_df_cl$cluster,Stud_Prof_label) # 5 out of 8 observations were correctly clustered. 
+```
+Why have Students 3, 2, and 7 been chosen for one cluster? The review of raw numbers shows that they have the lowest MTLD and AWL numbers. Lexical density was not considered in this clustering. 
+
+
+# Final notes
+
+```{r}
+Sys.setlocale("LC_CTYPE", "English") # to make sure that nothing changes how my other files are read
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
+
