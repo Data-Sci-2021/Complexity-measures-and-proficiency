@@ -11,7 +11,7 @@ The dataset for this project was randomly chosen from the Middlebury corpus of L
 ## Repo directory
 <li type=disc> [**final_report.md**](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/final_report.md) overall description of the project, theoretical contextualization, analysis and the story behind the final product
 
-<li type=disc> [README.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency#readme) you are here
+<li type=disc> [README.md](./README.md) you are here
 
 <li type=disc> [LICENSE.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/LICENSE.md) licensing terms
 
