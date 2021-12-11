@@ -9,9 +9,9 @@ The goal of the project was to understand what lexical complexity measures corre
 The dataset for this project was randomly chosen from the Middlebury corpus of L2 Russian texts. The Middlebury corpus is not currently publicly accessible but I worked as an RA during the compilation of this corpus, and the PI [Dr. Olesya Kisselev](https://utsa.academia.edu/OlesyaKisselev) gave me the permission to explore the corpus in my statistics courses as part of my coursework. The Middlebury corpus consists of essays written by students as part of placement (pre-test) and final examination (post-test) in the summer of 2019. The original corpus includes 601 essays (103,150 words total) by 133 Russian L2 learners at different levels of proficiency. The sub-corpus for this project includes 24 essays (4,854 words total) by 8 L2 Russian learners, with 4 students rated as intermediate and 4 students rated as advanced.
 
 ## Repo directory
-<li type=disc> [**final_report.md**](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/final_report.md) overall description of the project, theoretical contextualization, analysis and the story behind the final product
+<li type=disc> [**final_report.md**](main/final_report.md) overall description of the project, theoretical contextualization, analysis and the story behind the final product
 
-<li type=disc> [README.md](./README.md) you are here
+<li type=disc> [README.md](main/README.md) you are here
 
 <li type=disc> [LICENSE.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/LICENSE.md) licensing terms
 
