@@ -10,17 +10,29 @@ The dataset for this project was randomly chosen from the Middlebury corpus of L
 
 ## Repo directory
 <li type=disc> [**final_report.md**](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/final_report.md): overall description of the project, theoretical contextualization, analysis and the story behind the final product
+
 <li type=disc> [README.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency#readme): you are here
+
 <li type=disc> [LICENSE.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/LICENSE.md): licensing terms
+
 <li type=disc> [project_plan.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/project_plan.md): my original plan before I started coding in R
+
 <li type=disc> [progress_report.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/progress_report.md): four progress reports throughout the semester
+
 <li type=disc> [presentation.pdf](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/Presentation_Final_Project.pdf): this is the pdf of the final presentation I gave at the end of the semester
+
 <li type=disc> [final_code.Rmd](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/final_code.Rmd): the loading of the sub-corpus, calculation of LC measures and cluster analysis
+
 <li type=disc> [final_code.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/final_code.md): the same output but in the HTML format
+
 <li type=disc> [data_sample](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/tree/main/data_sample): this is an example of a text in the sub-corpus
+
 <li type=disc> [non_lexical_items](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/tree/main/non_lexical_items_for_lex_density): these are .txt files that I created to be able to calculate lexical density of the corpus texts
+
 <li type=disc> [images](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/tree/main/final_code_files/figure-gfm): images of the cluster analysis
+
 <li type=disc> [scratchpad](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/tree/main/scratchpad): these are all the drafts I went through on my way to the final project
+
 
 ## Guestbook	
 Link to the [guestbook](https://github.com/Data-Sci-2021/Class-Lounge/blob/main/guestbooks/guestbook_Rossina.md)
