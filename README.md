@@ -9,29 +9,29 @@ The goal of the project was to understand what lexical complexity measures corre
 The dataset for this project was randomly chosen from the Middlebury corpus of L2 Russian texts. The Middlebury corpus is not currently publicly accessible but I worked as an RA during the compilation of this corpus, and the PI [Dr. Olesya Kisselev](https://utsa.academia.edu/OlesyaKisselev) gave me the permission to explore the corpus in my statistics courses as part of my coursework. The Middlebury corpus consists of essays written by students as part of placement (pre-test) and final examination (post-test) in the summer of 2019. The original corpus includes 601 essays (103,150 words total) by 133 Russian L2 learners at different levels of proficiency. The sub-corpus for this project includes 24 essays (4,854 words total) by 8 L2 Russian learners, with 4 students rated as intermediate and 4 students rated as advanced.
 
 ## Repo directory
-<li type=disc> [**final_report.md**](main/final_report.md) overall description of the project, theoretical contextualization, analysis and the story behind the final product
+<li type=disc> [**final_report.md**](final_report.md) overall description of the project, theoretical contextualization, analysis and the story behind the final product
 
-<li type=disc> [README.md](main/README.md) you are here
+<li type=disc> [README.md](README.md) you are here
 
-<li type=disc> [LICENSE.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/LICENSE.md) licensing terms
+<li type=disc> [LICENSE.md](LICENSE.md) licensing terms
 
-<li type=disc> [project_plan.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/project_plan.md) my original plan before I started coding in R
+<li type=disc> [project_plan.md](project_plan.md) my original plan before I started coding in R
 
-<li type=disc> [progress_report.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/progress_report.md) four progress reports throughout the semester
+<li type=disc> [progress_report.md](progress_report.md) four progress reports throughout the semester
 
-<li type=disc> [presentation.pdf](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/Presentation_Final_Project.pdf) this is the pdf of the final presentation I gave at the end of the semester
+<li type=disc> [presentation.pdf](Presentation_Final_Project.pdf) this is the pdf of the final presentation I gave at the end of the semester
 
-<li type=disc> [final_code.Rmd](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/final_code.Rmd) the loading of the sub-corpus, calculation of LC measures and cluster analysis
+<li type=disc> [final_code.Rmd](final_code.Rmd) the loading of the sub-corpus, calculation of LC measures and cluster analysis
 
-<li type=disc> [final_code.md](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/blob/main/final_code.md) the same output but in the HTML format
+<li type=disc> [final_code.md](final_code.md) the same output but in the HTML format
 
-<li type=disc> [data_sample](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/tree/main/data_sample) this is an example of a text in the sub-corpus
+<li type=disc> [data_sample](data_sample) this is an example of a text in the sub-corpus
 
-<li type=disc> [non_lexical_items](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/tree/main/non_lexical_items_for_lex_density) these are .txt files that I created to be able to calculate lexical density of the corpus texts
+<li type=disc> [non_lexical_items](non_lexical_items_for_lex_density) these are .txt files that I created to be able to calculate lexical density of the corpus texts
 
-<li type=disc> [images](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/tree/main/final_code_files/figure-gfm) images of the cluster analysis
+<li type=disc> [images](final_code_files/figure-gfm) images of the cluster analysis
 
-<li type=disc> [scratchpad](https://github.com/Data-Sci-2021/Complexity-measures-and-proficiency/tree/main/scratchpad) these are all the drafts I went through on my way to the final project
+<li type=disc> [scratchpad](scratchpad) these are all the drafts I went through on my way to the final project
 
 
 ## Guestbook	
