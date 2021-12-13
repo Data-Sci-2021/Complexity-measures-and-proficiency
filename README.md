@@ -21,11 +21,11 @@ The dataset for this project was randomly chosen from the Middlebury corpus of L
 
 <li type=disc> [presentation.pdf](Presentation_Final_Project.pdf) this is the pdf of the final presentation I gave at the end of the semester
 
-<li type=disc> [final_code.Rmd](/final_code.Rmd) the loading of the sub-corpus, calculation of LC measures and cluster analysis
+<li type=disc> [final_code.Rmd](final_code.Rmd) the loading of the sub-corpus, calculation of LC measures and cluster analysis
 
 <li type=disc> [final_code.md](final_code.md) the same output but in the HTML format
 
-<li type=disc> [data_sample](/data_sample) this is an example of a text in the sub-corpus
+<li type=disc> [data_sample](data_sample) this is an example of a text in the sub-corpus
 
 <li type=disc> [non_lexical_items](non_lexical_items_for_lex_density) these are .txt files that I created to be able to calculate lexical density of the corpus texts
 
