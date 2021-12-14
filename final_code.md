@@ -564,14 +564,13 @@ TTR_tog
     7 Student7   366    676 0.541
     8 Student8   466    829 0.562
 
-I think types are more meaningful for L2 English texts because Russian
-is more morphologically rich than English. Maybe lemmas would have been
-a better measure of lexical variation than types for L2 Russian texts.
-The TTR results are vastly different than MLTD results. The hypothesis
-is the higher the TTR, the higher proficiency. As it can be expected,
-the student with the shortest texts showed the highest TTR. Again, two
-intermediate level students have higher TTR than advanced level
-students.
+The TTR results are vastly different than MLTD results. The student with
+the shortest texts showed the highest TTR, which is what usually happens
+when text length is not controlled. Two intermediate level students have
+higher TTR than advanced level students, as in MTLD results. I think
+types are more meaningful for L2 English texts because Russian is more
+morphologically rich than English. Maybe lemmas would have been a better
+measure of lexical variation than types for L2 Russian texts.
 
 ## Lexical sophistication
 
@@ -642,14 +641,9 @@ similar to Jarvis et al. (2003). They had more data points and
 linguistic features, but my project is a pilot project on L2 Russian
 texts.  
 From [datacamp
-tutorial](https://www.datacamp.com/community/tutorials/hierarchical-clustering-R)
-<li type=disc>
-I need to scale my data points
-<li type=disc>
-Then, I can perform hierarchical cluster analysis
-<li type=disc>
-
-Last, I need to measure the goodness of clusters
+tutorial](https://www.datacamp.com/community/tutorials/hierarchical-clustering-R):
+I need to scale my data points. Then, I can perform hierarchical cluster
+analysis. Last, I need to measure the goodness of clusters.
 
 ``` r
 #I already have my dataframe df_for_clustering_tog
