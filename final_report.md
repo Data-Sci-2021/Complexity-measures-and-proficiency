@@ -33,9 +33,9 @@ It is difficult to come up with generalizable results from this study since ther
 Overall, I am glad I worked on this project. I realized that I can code and I can understand how magic LC numbers are calculated. In the future, I see myself trying to work out how to calculate lexical bundles and syntactic complexity measures and assess how relevant they are for proficiency ratings in L2 Russian texts.  
 
 ## References
-Barkaoui, K., & Hadidi, A. (2020). *Assessing change in English second language writing performance.* Routledge. 
-Jarvis, S., Grant, L., Bikowski, D., & Ferris, D. (2003). Exploring multiple profiles of highly rated learner compositions. *Journal of Second Language Writing*, 12(4), 377-403.
-Wolfe-Quintero, K., Inagaki, S., & Kim, H.-Y. (1998). *Second language development in writing: Measures of fluency, accuracy, & complexity.* University of Hawai'i.
+* Barkaoui, K., & Hadidi, A. (2020). *Assessing change in English second language writing performance.* Routledge. 
+* Jarvis, S., Grant, L., Bikowski, D., & Ferris, D. (2003). Exploring multiple profiles of highly rated learner compositions. *Journal of Second Language Writing*, 12(4), 377-403.
+* Wolfe-Quintero, K., Inagaki, S., & Kim, H.-Y. (1998). *Second language development in writing: Measures of fluency, accuracy, & complexity.* University of Hawai'i.
 
 
 
